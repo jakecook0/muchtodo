@@ -35,8 +35,8 @@ RUN apt-get install -y ssh
 # Add docker GPG key and install docker
 RUN  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg; \
   echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null; \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null; \
   apt-get update; \
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
@@ -56,8 +56,8 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 
 # Install OC
 RUN wget --no-check-certificate https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz; \
- tar -xzf openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz; \
- ln -s /workspaces/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit/oc /bin/oc
+  tar -xzf openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz; \
+  ln -s /workspaces/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit/oc /bin/oc
 
 # Install kubeval
 RUN wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz; \
@@ -85,3 +85,11 @@ RUN wget https://go.dev/dl/$GO_VERSION.linux-amd64.tar.gz \
   echo "export PATH=$PATH:/usr/local/go/bin" >> /home/$USER/.bashrc
 
 USER $UID
+
+# setup Nodejs
+RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash; \
+  export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"; \
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm; \
+  nvm install 18.12.1;
+
+WORKDIR /workspace
