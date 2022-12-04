@@ -1,0 +1,44 @@
+{
+  "name": "Dev checkout workspace",
+  "build": {
+      "dockerfile": "Dockerfile"
+  },
+  "runArgs": [
+      "--privileged",
+      // "--env-file", ".devcontainer/devcontainer.env"
+  ],
+  "extensions": [
+      "ms-python.python",
+      "redhat.vscode-yaml",
+      "ms-azuretools.vscode-docker",
+      "DavidAnson.vscode-markdownlint",
+      "tqrhsn.vscode-docker-registry-explorer",
+      "streetsidesoftware.code-spell-checker",
+      "denniskempin.vscode-include-fixer",
+      "eamodio.gitlens",
+      "njpwerner.autodocstring",
+      "mutantdino.resourcemonitor",
+      "redhat.java",
+      "vscjava.vscode-java-pack",
+      "vscjava.vscode-java-debug",
+      "vscjava.vscode-maven",
+      "vscjava.vscode-java-dependency",
+      "vscjava.vscode-java-test",
+      "vscjava.vscode-gradle",
+      "golang.go"
+  ],
+  // "workspaceFolder": "/workspaces",
+  "mounts": [
+    "source=/home/oasis/.ssh,target=/home/oasis/.ssh/,type=bind",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    // "source=/c/dev,target=/c/dev/,type=bind"
+  ],
+  "settings": {
+      "editor.formatOnPaste": true,
+      "editor.formatOnSave": true,
+      "editor.tabSize": 2,
+      "files.eol": "\n"
+  },
+  // Fix permissions for Docker commands to work without sudo when started from Windows
+  "postCreateCommand": "if [[ ${localWorkspaceFolder} =~ ^/ ]]; then echo 'Running on Linux'; else echo 'Running on Windows; adjusting Docker socket permissions...' && sudo chmod o+w /var/run/docker.sock; fi"
+}
