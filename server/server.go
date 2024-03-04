@@ -1,71 +1,47 @@
 package main
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"os"
-
-	"gopkg.in/yaml.v3"
 )
-
-type Config struct {
-	Host string
-	Port string
-}
 
 func main() {
 	fmt.Println("Starting Server muchtodo...")
 
-	config := setup()
+	config := configSetup()
 
-	// TODO: start a server listening/serving on host/port config
+	// Health endpoint
 	healthHandler := func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "text/plain")
+		writer.WriteHeader(http.StatusOK)
 		io.WriteString(writer, "OK")
 	}
 
-	http.HandleFunc("/health", healthHandler)
+	// list get endpoint
+	listHandler := func(writer http.ResponseWriter, request *http.Request) {
+		list := getLists()
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusOK)
+		json.NewEncoder(writer).Encode(list)
+	}
 
+	// list update endpoint
+	listUpdaterHandler := func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "text/plain")
+		writer.WriteHeader(http.StatusCreated)
+		io.WriteString(writer, addTaskToList("Added task from endpoint abc", "Demo Tasks"))
+	}
+
+	// register handlers
+	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/lists", listHandler)
+	http.HandleFunc("/lists/update", listUpdaterHandler)
+
+	// Start server
 	server := &http.Server{
 		Addr: config.Host + ":" + config.Port,
 	}
 	server.ListenAndServe()
-}
-
-func setup() Config {
-	// check that file exists
-	var filePath string = "config.yaml"
-
-	if !checkFileExists(filePath) {
-		log.Fatalf("Config file %s not found, must be next to the server.", filePath)
-		// TODO: how to handle errors
-	}
-
-	configData, err := os.ReadFile(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	config := parseConfig(configData)
-
-	log.Printf("Config: %v", config)
-
-	return *config
-}
-
-func checkFileExists(filePath string) bool {
-	_, error := os.Stat(filePath)
-	return !errors.Is(error, os.ErrNotExist)
-}
-
-func parseConfig(configData []byte) *Config {
-	config := Config{}
-
-	err := yaml.Unmarshal(configData, &config)
-	if err != nil {
-		log.Fatalf("Error parsing YAML, %v", err)
-	}
-
-	return &config
 }
