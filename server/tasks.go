@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+)
+
+var lists = make([]List, 0)
+
 var testlists = []List{
 	{
 		Name: "Test Tasks",
@@ -39,8 +45,13 @@ func getLists() []List {
 	return testlists
 }
 
-func addTaskToList(text string, listname string) string {
-	listIndex := getListIndex(listname)
+func addTaskToList(listname string, text string) error {
+	listIndex, err := getListIndex(listname)
+	if err != nil {
+		println("Failed to update list", err)
+		return err
+	}
+
 	currNumTasks := testlists[listIndex].NumTasks
 
 	newTask := Task{
@@ -56,16 +67,21 @@ func addTaskToList(text string, listname string) string {
 	testlists[listIndex].TaskItems = listTasks
 	testlists[listIndex].NumTasks = currNumTasks + 1
 
-	return "Task Added"
+	return nil
+}
+
+func createList(listname string) error {
+	lists = append(lists, List{Name: listname, TaskItems: make([]Task, 0), NumTasks: 0})
+	return nil
 }
 
 // Debug func only
-func getListIndex(listname string) int {
+func getListIndex(listname string) (int, error) {
 	for index, value := range testlists {
 		if value.Name == listname {
-			return index
+			return index, nil
 		}
 	}
 	// list not found
-	return -1
+	return -1, fmt.Errorf("List not found with name: %s", listname)
 }
